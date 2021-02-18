@@ -98,7 +98,7 @@ export interface Driver {
     /**
      * Synchronizes database schema (creates tables, indices, etc).
      */
-    createSchemaBuilder(): SchemaBuilder;
+    createSchemaBuilder(): SchemaBuilder | void;
 
     /**
      * Creates a query runner used for common queries.

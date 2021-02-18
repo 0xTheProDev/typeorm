@@ -10,7 +10,6 @@ import { Connection } from "../../connection/Connection";
 import { ElasticSearchConnectionOptions } from "./ElasticSearchConnectionOptions";
 import { MappedColumnTypes } from "../types/MappedColumnTypes";
 import { ColumnType } from "../types/ColumnTypes";
-import { ElasticSearchSchemaBuilder } from "../../schema-builder/ElasticSearchSchemaBuilder";
 import { DataTypeDefaults } from "../types/DataTypeDefaults";
 import { TableColumn } from "../../schema-builder/table/TableColumn";
 import { ConnectionOptions } from "../../connection/ConnectionOptions";
@@ -140,6 +139,7 @@ export class ElasticSearchDriver implements Driver {
    * Sync with https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/7.x/basic-config.html
    */
   protected validOptionNames: string[] = [
+    "type",
     "url",
     "proxy",
     "host",
@@ -225,7 +225,7 @@ export class ElasticSearchDriver implements Driver {
    * Creates a schema builder used to build and sync a schema.
    */
   createSchemaBuilder() {
-    return new ElasticSearchSchemaBuilder(this.connection);
+    throw new Error(`This operation is not supported by ElasticSearch driver.`);
   }
 
   /**
@@ -406,7 +406,8 @@ export class ElasticSearchDriver implements Driver {
       return options.url;
     }
 
-    return `https://${options.host || "127.0.0.1"}:${options.port || 9200}`;
+    const protocol = options.ssl ? "https" : "http";
+    return `${protocol}://${options.host || "127.0.0.1"}:${options.port || 9200}`;
   }
 
   /**
@@ -458,6 +459,7 @@ export class ElasticSearchDriver implements Driver {
 
     /* eslint-disable @typescript-eslint/no-unused-vars */
     const {
+      type,
       url,
       host,
       port,

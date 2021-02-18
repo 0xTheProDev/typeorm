@@ -55,7 +55,7 @@ export class Connection {
     /**
      * Connection name.
      */
-    readonly name: string;
+    readonly name: string | Symbol;
 
     /**
      * Connection options.
@@ -175,7 +175,7 @@ export class Connection {
      */
     async connect(): Promise<this> {
         if (this.isConnected)
-            throw new CannotConnectAlreadyConnectedError(this.name);
+            throw new CannotConnectAlreadyConnectedError(this.name.toString());
 
         // connect to the database via its driver
         await this.driver.connect();
@@ -223,7 +223,7 @@ export class Connection {
      */
     async close(): Promise<void> {
         if (!this.isConnected)
-            throw new CannotExecuteNotConnectedError(this.name);
+            throw new CannotExecuteNotConnectedError(this.name.toString());
 
         await this.driver.disconnect();
 
@@ -243,7 +243,7 @@ export class Connection {
     async synchronize(dropBeforeSync: boolean = false): Promise<void> {
 
         if (!this.isConnected)
-            throw new CannotExecuteNotConnectedError(this.name);
+            throw new CannotExecuteNotConnectedError(this.name.toString());
 
         if (dropBeforeSync)
             await this.dropDatabase();
@@ -285,7 +285,7 @@ export class Connection {
      */
     async runMigrations(options?: { transaction?: "all" | "none" | "each" }): Promise<Migration[]> {
         if (!this.isConnected)
-            throw new CannotExecuteNotConnectedError(this.name);
+            throw new CannotExecuteNotConnectedError(this.name.toString());
 
         const migrationExecutor = new MigrationExecutor(this);
         migrationExecutor.transaction = (options && options.transaction) || "all";
@@ -301,7 +301,7 @@ export class Connection {
     async undoLastMigration(options?: { transaction?: "all" | "none" | "each" }): Promise<void> {
 
         if (!this.isConnected)
-            throw new CannotExecuteNotConnectedError(this.name);
+            throw new CannotExecuteNotConnectedError(this.name.toString());
 
         const migrationExecutor = new MigrationExecutor(this);
         migrationExecutor.transaction = (options && options.transaction) || "all";
@@ -315,7 +315,7 @@ export class Connection {
      */
     async showMigrations(): Promise<boolean> {
         if (!this.isConnected) {
-            throw new CannotExecuteNotConnectedError(this.name);
+            throw new CannotExecuteNotConnectedError(this.name.toString());
         }
         const migrationExecutor = new MigrationExecutor(this);
         return await migrationExecutor.showMigrations();
@@ -538,6 +538,8 @@ export class Connection {
             case "mssql":
             case "oracle":
                 return DriverUtils.buildDriverOptions(options.replication ? options.replication.master : options).database;
+            case "elasticsearch":
+                return "elasticsearch";
             default:
                 return DriverUtils.buildDriverOptions(options).database;
     }
